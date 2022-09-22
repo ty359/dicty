@@ -1,6 +1,9 @@
 #pragma once
 
-#include <bits/stdc++.h>
+#include <string>
+#include <vector>
+#include <cstring>
+#include <unordered_set>
 
 namespace Dicty {
 
@@ -19,19 +22,24 @@ class Dicty {
 public:
     void Compile(const vector<string>& keys);
     inline int Get(const char *key_data, size_t key_size) {
-        int ret = buffer_[HashSelect(key_data, key_size, select_pos_, beta_) & buffer_size_bit_mask_];
+        int ret = At(key_data, key_size);
         if (ret == -1) {
             return -1;
         }
-#ifdef CEHCK_GET
         if (key_size_[ret] != key_size || memcmp(key_data_[ret], key_data, key_size) != 0) {
             return -1;
         }
-#endif
         return ret;
     }
     inline int Get(const string& key) {
         return Get(key.data(), key.size());
+    }
+
+    inline int At(const char *key_data, size_t key_size) {
+        return buffer_[HashSelect(key_data, key_size, select_pos_, beta_) & buffer_size_bit_mask_];
+    }
+    inline int At(const string& key) {
+        return At(key.data(), key.size());
     }
 
     void Stat() {
