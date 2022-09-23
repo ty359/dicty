@@ -1,4 +1,7 @@
 #include "dicty.h"
+#include "select.h"
+
+#include <unordered_map>
 
 namespace Dicty {
 
@@ -24,44 +27,6 @@ inline T lower_bound16(T k) {
     return ret;
 }
 
-bool IsUnique(const vector<string>& keys, const vector<int>& select_pos) {
-    std::unordered_set<string> s_keys;
-    for (auto& key: keys) {
-        string s_key = "";
-        s_key.reserve(select_pos.size() + 1);
-        for (auto pos: select_pos) {
-            if (pos >= (int)key.size())
-                break;
-            s_key.push_back(key[pos]);
-        }
-        if (s_keys.count(s_key) != 0) {
-            return false;
-        }
-        s_keys.insert(s_key);
-    }
-    return true;
-}
-
-// TODO: too slow
-void GetMinSelect(const vector<string>& keys, int key_max_size, vector<int>& select_pos) {
-    vector<vector<int>> select_que;
-    for (int i = 0; i < key_max_size; ++ i) {
-        select_que.push_back({i});
-    }
-
-    for (int i = 0; i < (int)select_que.size(); ++ i) {
-        if (IsUnique(keys, select_que[i])) {
-            select_pos = select_que[i];
-            return ;
-        }
-        for (int j = select_que[i].back() + 1; j < key_max_size; ++ j) {
-            auto new_select = select_que[i];
-            new_select.push_back(j);
-            select_que.emplace_back(new_select);
-        }
-    }
-}
-
 void Dicty::Compile(const vector<string>& keys) {
     keys_ = keys;
     MakeKeyBuffer();
@@ -69,7 +34,8 @@ void Dicty::Compile(const vector<string>& keys) {
     for (auto& key: keys_) {
         key_max_size_ = std::max(key_max_size_, (int)key.length());
     }
-    GetMinSelect(keys_, key_max_size_, select_pos_);
+    Select().Get(keys_, select_pos_, 100000);
+
     beta_.resize(select_pos_.size());
 
     int buffer_size = highbit((int)keys.size() * 10);
